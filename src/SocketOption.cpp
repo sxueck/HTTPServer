@@ -1,8 +1,8 @@
 #include "../hf/net.h"
-#include "other.h"
-#include <vector>
 
-int ListenConnect(uint16_t lisPort,const char *lisIp,unsigned int lisNq){
+using namespace std;
+
+extern int ListenConnect(uint16_t lisPort,const char *lisIp,unsigned int lisNq){
    /*lisProt need uint16_t and between to 0-65535(under 1024 need root)*/
    int servSock = socket(PF_INET,SOCK_STREAM,0);
    
@@ -19,13 +19,12 @@ int ListenConnect(uint16_t lisPort,const char *lisIp,unsigned int lisNq){
    if (bind(servSock,(struct sockaddr*)&servInfo,sizeof(servInfo)) != 0){
       return BINDERR;
        /*check:root,port num*/
-   } else {
-      listen(servSock,lisNq);
-      return servSock;
    }
+   listen(servSock,lisNq);
+   return servSock;
 }
 
-int AcceptConnect(int servSock,string *reCliAddr,uint16_t *reCliPort){
+extern int AcceptConnect(int servSock,string *reCliAddr,uint16_t *reCliPort){
    /*return client ip and port*/
    struct sockaddr_in cliScok;
    socklen_t cliScokLen = sizeof(cliScok);
@@ -45,15 +44,16 @@ int AcceptConnect(int servSock,string *reCliAddr,uint16_t *reCliPort){
    return accAddr;
 }
 
-int SendSession(int sdAccAddr,const char *sendStr){
-   int reSendSs = write(sdAccAddr,sendStr,sizeof(sendStr));
+extern int SendSession(int sdAccAddr,string sendStr){
+   int reSendSs = write(sdAccAddr,sendStr.c_str(),strlen(sendStr.c_str()));
+	//int reSendSs = send(sdAccAddr,sendStr,(int)sizeof(sendStr),0);
    if (reSendSs < 0 ){
       return SENDERR;
    }
 	return 0;
 }
 
-int RecvSession(int rvAccAddr,char *txtBuffer,unsigned int txtLen){
+extern int RecvSession(int rvAccAddr,char *txtBuffer,unsigned int txtLen){
 	struct iovec iov;
 	iov.iov_base = txtBuffer;
 	iov.iov_len = txtLen;
@@ -64,7 +64,7 @@ int RecvSession(int rvAccAddr,char *txtBuffer,unsigned int txtLen){
 	}
 }
 
-int CloseSocket(int servSock,int closeNum){
+extern void CloseSocket(int servSock,int closeNum){
 	//SD_RECEIVE:recv 0
 	//SD_SEND:send 1
 	//SD_BOTH:all 2
@@ -77,5 +77,4 @@ int CloseSocket(int servSock,int closeNum){
 		default:
 			shutdown(servSock,SHUT_RDWR);
 	}
-
 }

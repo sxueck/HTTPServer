@@ -30,6 +30,10 @@
 #include <iostream>
 #endif
 
+#ifndef __STRING
+#include <string>
+#endif
+
 //Error
 #define IPADDRERR -14
 #define BINDERR -15
