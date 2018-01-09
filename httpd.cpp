@@ -4,3 +4,7 @@
 */
 
 #include "hf/net.h"
+
+int main(){
+	
+}
