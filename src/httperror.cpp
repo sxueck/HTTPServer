@@ -22,6 +22,10 @@ void urlToLong(){
 	string httpData = "HTTP/1.1 414 Request-URI Too Long\r\n";
 	httpData += "Connection: close\r\n";
 	httpData += "\r\n";
-	httpData += "<h2>414 Error,URL To Long....^_^</h2>\r\n";
+	SendSession(servAddr,httpData);
+}
+
+void urlNotFound(){
+	string httpData = "HTTP/1.1 404 Not Found\r\n";
 	SendSession(servAddr,httpData);
 }

@@ -30,7 +30,7 @@ extern int AccRequest(int accCli,string *httpCode){
 	char recvHeader[2048];
 	vector<char> url(URLLEN);
 	char method[4];
-	while(true){
+//	while(true){
 		memset(method,'\0',4);
 		memset(recvHeader,'\0',2048);
 		//full '0'
@@ -52,7 +52,8 @@ extern int AccRequest(int accCli,string *httpCode){
 
 		if (strcmp(method,"POST") || strcmp(method,"GET")){
 			while(!isspace(recvHeader[++i])){
-				url.push_back(recvHeader[i]);
+				//url.push_back(recvHeader[i]);
+				url[ i - sizeof(method)/sizeof(char) ] = recvHeader[i];
 				if (i == URLLEN - URLLEN_BOOM ){
 					url.resize(URLLEN * 2);
 				} else if (i == (URLLEN * 2 - URLLEN_BOOM)){
@@ -61,23 +62,31 @@ extern int AccRequest(int accCli,string *httpCode){
 					url.resize(URLLEN * 8);
 				} else if (i == 2048){
 					HttpError(2,accCli);
+					CloseSocket(accCli,0);
+					return 0;
 				}
 				//best many for 2048
 			}
-//			cout << url.size();
 		}
-		for (int i = 0;i <= url.size();i++){
-			cout << url[i];
+		i -= 4;
+		//del "post" or "get"
+	char indexPage[] = "index.html";
+	if (url[i] == '/'){
+		url.resize(i + 1);
+		url.push_back(*indexPage);
+	}
+
+		for (int j = 0;j <= i;j++){
+			cout << url[j];
 		}
 	
 		//cout << recvHeader;
 		if (HttpRequest(accCli,httpCode) == -1){
 			cout << "Sorry,Send Error";
 		}
-		//url.clear();
 		vector<char>().swap(url);
 		//clear memory
-	}
+	//}
 	CloseSocket(accCli,2);
 	return 0;
 }
