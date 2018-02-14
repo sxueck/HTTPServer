@@ -1,4 +1,4 @@
-#include "../hf/net.h"
+#include "../../hf/net.h"
 
 using namespace std;
 
@@ -44,12 +44,24 @@ extern int AcceptConnect(int servSock,string *reCliAddr,uint16_t *reCliPort){
    return accAddr;
 }
 
-extern int SendSession(int sdAccAddr,string sendStr){
-   int reSendSs = write(sdAccAddr,sendStr.c_str(),strlen(sendStr.c_str()));
+extern int SendSession(int sdAccAddr,string *sendStr,long long strLength){
+   int reSendSs = write(sdAccAddr,sendStr->c_str(),strLength);
+/*   struct iovec wr_iov;
+   wr_iov.iov_len = strLength;
+   
+   void* sStrCopy = malloc(strLength);
+   memcpy(sStrCopy,sendStr->c_str(),strLength);
+   //const void* to void*,copy memory to void*
+
+   wr_iov.iov_base = sStrCopy;
+
+   free(sStrCopy);
+
+   ssize_t nWrite = writev(sdAccAddr,&wr_iov,1);
 	//int reSendSs = send(sdAccAddr,sendStr,(int)sizeof(sendStr),0);
-   if (reSendSs < 0 ){
+   if (nWrite == -1 ){
       return SENDERR;
-   }
+   }*/
 	return 0;
 }
 
@@ -78,3 +90,19 @@ extern void CloseSocket(int servSock,int closeNum){
 			shutdown(servSock,SHUT_RDWR);
 	}
 }
+
+/*extern string createShellProcess(const char* cmd){
+   char *result;
+   FILE *fpRead = popen(cmd,"r");
+   char htmlCodeRecv[1000000];
+   //test
+   memset(htmlCodeRecv,'\0',1000000);
+   while(fgets(htmlCodeRecv,1000000-1,fpRead) != NULL){
+      result = htmlCodeRecv;
+   }
+   if (fpRead != NULL){
+      pclose(fpRead);
+   }
+   string strResult(result);
+   return strResult;
+}*/

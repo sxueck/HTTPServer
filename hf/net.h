@@ -7,6 +7,8 @@
 #define __net_h
 #endif
 
+typedef unsigned char byte;
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
