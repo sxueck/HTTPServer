@@ -4,20 +4,8 @@ using namespace std;
 
 extern string httpMime(string urlStr){
    //get me all url string
-   string extName;
+   string extName = urlStr.substr(urlStr.rfind(".") + 1,urlStr.length());
    
-   int i = urlStr.length();
-   while(true){
-      if (urlStr[i] != '.'){
-         extName += urlStr[i];
-         i--;
-      } else {
-         break;
-      }
-   }
-
-   reverse(extName.begin(),extName.end());
-  
    //mime dic
    map<string,string> mime;
    mime["avi"] = "video/x-msvideo";

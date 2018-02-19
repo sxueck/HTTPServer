@@ -4,7 +4,6 @@ using namespace std;
 
 #define URLLEN 256
 #define URLLEN_BOOM 100
-#define SERVERINFO "Server: wlsxServer/beta\r\n"
 
 extern int AcceptConnect(int,string*,uint16_t*);
 extern int SendSession(int,string*,long long);
@@ -16,7 +15,7 @@ extern string PageQu(string);
 extern string httpMime(string);
 extern string createShellProcess(const char*);
 
-int HttpRequest(int,string*);
+int HttpRequest(int,string*,string);
 int HttpRequest(int,byte*,string,long long);
 
 extern int GetCliAddr(int servIp){
@@ -58,7 +57,7 @@ extern int AccRequest(int accCli){
 		while(!isspace(recvHeader[++i])){
 			surl += recvHeader[i];
 			if (i == 2048){
-				//HttpError(2,accCli);
+				HttpError(2,accCli);
 				CloseSocket(accCli,0);
 				return 0;
 			}
@@ -71,43 +70,41 @@ extern int AccRequest(int accCli){
 	if (surl[surl.length() - 1] == '/'){
 		surl += dePage;
 	}
-   //cout << surl;
+   //cout << surl << endl;
    
    string fileContentType = httpMime(surl);
    
    string pagePath = ConfQuery("WebRoot") + surl;
    //binary file read
 
-   string pageCode = PageQu(surl);
+   string pageCode = PageQu(pagePath);
    if (pageCode == ""){
       cout << "file read error";
+      HttpError(3,accCli);
       return -1;
    }
 
-   if (fileContentType == "text/html"){
-      if (dePage == "index.html"){
-	      if (HttpRequest(accCli,&pageCode) == -1){
-            cout << "Sorry,Send Error";
-         }
-/*      } else if (dePage == "index.php"){
-         string cmd = "php -f " + pagePath;
-         //if don't it,Error "invalid operands to binary expression ('const char *' and 'const char *')"
-         string cmdResult = createShellProcess(cmd.c_str());
-         if (HttpRequest(accCli,cmdResult) == -1 ){
-            cout << "PHP To Html Error" << endl;
-         }*/
+   if (fileContentType == "text/plain" | fileContentType == "text/html" | fileContentType == "application/x-javascript" | fileContentType == "text/css"){
+      //this is text mime
+      //cout << endl << fileContentType;
+      if (fileContentType != "php"){
+         HttpRequest(accCli,&pageCode,fileContentType);
+      } else {
+         cout << endl << "php";
+         return -1;
       }
    } else {
       ifstream file(pagePath,ios::in);
 
       if (!file){
          file.close();
+         HttpError(3,accCli);
          return -1;
       }
 
       file.seekg(0,ios_base::end);
       long long fSize = file.tellg();
-      cout << fSize;
+      //cout << fSize;
       byte *binData = new byte[fSize];
       //bit data byte value
       file.seekg(0,ios::beg);
@@ -127,26 +124,24 @@ extern int AccRequest(int accCli){
       */
    }
 
-	/*if (HttpRequest(accCli,httpCode,) == -1){
-		cout << "Sorry,Send Error";
-	}*/
-
 	//clear memory
 	CloseSocket(accCli,2);
 	return 0;
 }
 
-int HttpRequest(int cliAddr,string *pageCode){
-	string httpdata; 
+int HttpRequest(int cliAddr,string *pageCode,string ContentType){
+	//text send
+   string httpdata; 
 	//const char* to string
 	httpdata = "HTTP/1.1 200 OK\r\n";
 	httpdata += SERVERINFO;
-	httpdata += "Content-Type: text/html\r\n";
+	httpdata += "Content-Type: "+ ContentType + "\r\n";
 	httpdata += "Content-Length: " + to_string(pageCode->length())  + "\r\n";
-	httpdata += "Connection: close\r\n";
+	httpdata += "Connection: keep-alive\r\n";
 	httpdata += "\r\n";
 	httpdata += *pageCode;
    httpdata += "\r\n";
+   //cout << endl << httpdata;
 	if (SendSession(cliAddr,&httpdata,httpdata.length()) == SENDERR){
 		return -1;
 	} else {
@@ -155,6 +150,7 @@ int HttpRequest(int cliAddr,string *pageCode){
 }
 
 int HttpRequest(int cliAddr,byte *binFileData,string ContentType,long long ContentSize){
+   //binary send
    string httpdata;
    httpdata = "HTTP/1.1 200 OK\r\n";
    httpdata += SERVERINFO;
@@ -164,7 +160,7 @@ int HttpRequest(int cliAddr,byte *binFileData,string ContentType,long long Conte
    httpdata += "\r\n";
    httpdata.append((const char*)binFileData,ContentSize);
    httpdata += "\r\n";
-   cout << httpdata.length();
+   //cout << httpdata.length();
    if (SendSession(cliAddr,&httpdata,httpdata.length()) == SENDERR){
       return -1;
    } else {

@@ -7,7 +7,8 @@ sxwl:
 			  src/request.cpp \
 			  src/optionFile.cpp \
 			  src/mycode/SocketOption.cpp \
-			  src/httpdeal/mime.cpp
+			  src/httpdeal/mime.cpp \
+			  src/httpdeal/httperror.cpp
 
 clean:
 	rm sxwl

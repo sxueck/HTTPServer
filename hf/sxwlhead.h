@@ -13,3 +13,6 @@
 #include <algorithm>
 #include <map>
 #include <time.h>
+#include <regex>
+
+#define SERVERINFO "Server: wlsxServer/beta\r\n"

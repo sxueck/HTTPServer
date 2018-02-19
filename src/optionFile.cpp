@@ -63,26 +63,24 @@ extern string ConfQuery(string Query)
 
 extern string PageQu(string page)
 {
-	filebuf *pbuf;
 	long size;
 	char *buffer;
-	string directory = ConfQuery("WebRoot");
-	directory += page;
+	//string directory = ConfQuery("WebRoot");
+	//directory += page;
 	ifstream ifstr;
-	ifstr.open(directory.c_str(),ios::in|ios::binary);
+	ifstr.open(page,ios::in|ios::binary);
 	if (!ifstr)
 	{
 		return "";
 	}
 	else
 	{
-		pbuf = ifstr.rdbuf();
-		size = pbuf->pubseekoff(0,ios::end,ios::in);
-		pbuf->pubseekpos (0,ios::in);
-		buffer = new char[size];
-		pbuf->sgetn(buffer,size-2);
-		string rePageCode(buffer);
-		//cout << rePageCode;
+      ifstr.seekg(0,ios::end);
+      size = ifstr.tellg();
+      buffer = new char[size];
+      ifstr.seekg(0,ios::beg);
+      ifstr.read(buffer,size);
+      string rePageCode(buffer);
 		ifstr.close();
 		return rePageCode;
 	}
